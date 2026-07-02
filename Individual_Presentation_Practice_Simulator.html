@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Individual presentation planner and rehearsal simulator for INU3112/3512.">
+<title>INU3112/3512 Individual Presentation Simulator</title>
+<style>
+:root{
+  --dark-blue:#051435;
+  --rich-blue:#003a65;
+  --mid-blue:#0073bc;
+  --bright-blue:#29b7ea;
+  --light-blue:#8ed8f8;
+  --teal:#00857e;
+  --bright-teal:#00dbcf;
+  --yellow:#fdc82f;
+  --red:#da1a35;
+  --white:#ffffff;
+  --body:#26313a;
+  --muted:#536675;
+  --page:#f3f8fb;
+  --line:#c6dae8;
+  --soft-blue:#eaf6fc;
+  --soft-teal:#e8f7f5;
+  --soft-yellow:#fff8dd;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--page);color:var(--body);font:16px/1.52 Arial,"Helvetica Neue",sans-serif}
+button,select,input,textarea{font:inherit}
+header{background:var(--dark-blue);color:var(--white);border-bottom:10px solid var(--mid-blue)}
+.hero{max-width:1180px;margin:0 auto;padding:30px 20px 28px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--yellow);color:var(--dark-blue);font-weight:800;border-radius:999px;padding:6px 11px;font-size:.82rem;margin-bottom:12px}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.02;margin:0 0 10px;letter-spacing:-.025em}
+.hero p{max-width:880px;margin:0;color:var(--white);font-size:1.04rem}
+.palette-line{height:8px;display:grid;grid-template-columns:5fr 3fr 1fr 1fr}
+.palette-line span:nth-child(1){background:var(--rich-blue)}
+.palette-line span:nth-child(2){background:var(--bright-blue)}
+.palette-line span:nth-child(3){background:var(--teal)}
+.palette-line span:nth-child(4){background:var(--yellow)}
+main{max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+.info-panel{background:var(--white);border:2px solid var(--mid-blue);border-left:9px solid var(--mid-blue);border-radius:14px;padding:15px 17px;margin-bottom:18px;box-shadow:0 6px 18px rgba(5,20,53,.06)}
+.info-panel strong{color:var(--dark-blue)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.chip{background:var(--soft-blue);color:var(--rich-blue);border:1px solid var(--light-blue);border-radius:999px;padding:5px 9px;font-weight:750;font-size:.82rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.tab{border:1px solid var(--line);background:var(--white);color:var(--dark-blue);border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--rich-blue);color:var(--white);border-color:var(--rich-blue)}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}
+.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 7px 22px rgba(5,20,53,.07)}
+h2,h3{color:var(--dark-blue);margin-top:0}h2{font-size:1.45rem;margin-bottom:13px}h3{font-size:1.08rem}
+.field{margin:0 0 14px}.field label{display:block;color:var(--dark-blue);font-weight:800;margin-bottom:5px}.field small{display:block;color:var(--muted);margin-top:4px}
+select,input[type="text"],textarea{width:100%;border:1px solid #789fba;border-radius:10px;padding:10px 11px;background:var(--white);color:var(--body)}
+select:focus,input:focus,textarea:focus,button:focus{outline:3px solid var(--light-blue);outline-offset:2px}
+textarea{min-height:92px;resize:vertical}
+.btn{border:0;background:var(--teal);color:var(--white);border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}
+.btn:hover{filter:brightness(.95)}.btn.secondary{background:var(--rich-blue)}.btn.ghost{background:var(--white);color:var(--rich-blue);border:1px solid var(--mid-blue)}.btn.danger{background:var(--red)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.question-box{background:var(--soft-yellow);border:1px solid #e4ca66;border-left:7px solid var(--yellow);border-radius:12px;padding:14px 15px;margin-top:8px}
+.question-box .label{display:block;color:#6b5100;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.question-box .question{color:var(--dark-blue);font-weight:850;font-size:1.18rem;line-height:1.38}
+.rule{background:var(--soft-teal);border-left:5px solid var(--teal);border-radius:10px;padding:13px}
+.framework-list{display:grid;gap:8px}
+.framework-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--soft-blue)}
+.framework-item strong{color:var(--rich-blue)}
+.brief{background:var(--soft-blue);border:1px solid var(--line);border-left:7px solid var(--mid-blue);border-radius:12px;padding:16px;min-height:120px}
+.brief h3{font-size:1.23rem;margin:5px 0 10px}
+.meta{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:7px}.pill{display:inline-block;background:var(--rich-blue);color:var(--white);border-radius:999px;padding:4px 8px;font-weight:800;font-size:.78rem}.pill.accent{background:var(--teal)}
+.muted{color:var(--muted)}
+.slide{border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:10px;background:var(--white)}
+.slide-head{display:flex;gap:9px;align-items:center;color:var(--dark-blue);font-weight:850}.num{display:grid;place-items:center;min-width:28px;height:28px;border-radius:50%;background:var(--rich-blue);color:var(--white);font-size:.84rem}.slide p{color:var(--muted);margin:6px 0 8px}
+.checks label{display:block;margin:8px 0}.checks input{accent-color:var(--teal)}
+.status{font-weight:800;margin-top:8px}.good{color:var(--teal)}.warn{color:var(--red)}
+.timer{font-variant-numeric:tabular-nums;text-align:center;font-size:clamp(3.3rem,10vw,6.2rem);font-weight:900;letter-spacing:-.05em;color:var(--dark-blue)}
+.timer.over{color:var(--red)}.timer-note{text-align:center;color:var(--muted);min-height:1.5em}
+.progress{height:13px;background:#dcebf4;border-radius:999px;overflow:hidden;margin:12px 0 18px}.progress span{display:block;height:100%;width:0;background:var(--teal);transition:width .2s}
+.stage{display:grid;grid-template-columns:115px 1fr;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px}.stage.current{border-color:var(--teal);background:var(--soft-teal);box-shadow:0 0 0 2px rgba(0,133,126,.12)}.stage.done{opacity:.5}
+.prompt{background:var(--soft-blue);border:1px solid var(--line);border-radius:12px;padding:15px;min-height:92px}
+.follow-question{font-size:1.25rem;font-weight:850;color:var(--dark-blue);margin:7px 0 12px}.hint{display:none;background:var(--soft-teal);border-left:5px solid var(--teal);border-radius:8px;padding:11px}.hint.show{display:block}
+.rubric-row{display:grid;grid-template-columns:minmax(170px,1.1fr) 2fr 52px;gap:12px;align-items:center;margin:13px 0}.rubric-row input{width:100%;accent-color:var(--teal)}.score{font-weight:900;color:var(--teal);text-align:center}
+.feedback{background:var(--soft-blue);border:1px solid var(--line);border-radius:12px;padding:14px}
+footer{color:var(--muted);text-align:center;font-size:.85rem;margin-top:35px}
+@media(max-width:820px){.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.rubric-row{grid-template-columns:1fr}.score{text-align:left}.stage{grid-template-columns:1fr}.hero{padding-top:24px}}
+@media print{header{border-bottom:3px solid var(--mid-blue)}.tabs,.actions,.timer-controls,footer,.info-panel{display:none!important}.panel{display:block!important}.card{box-shadow:none;break-inside:avoid}.hero{padding:14px}.hero h1{font-size:25px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hero">
+    <div class="badge">10-MINUTE INDIVIDUAL PRESENTATION</div>
+    <h1>Individual Presentation Practice Simulator</h1>
+    <p>Choose a theoretical framework, an exact question and two disciplinary lenses. Then build, rehearse and evaluate a 10-minute individual presentation with follow-up questions.</p>
+  </div>
+  <div class="palette-line" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+</header>
+<main>
+  <section class="info-panel" aria-label="Simulator overview">
+    <strong>Build an interdisciplinary presentation.</strong> Choose one primary degree pathway, one supporting disciplinary lens and a specific evaluative question linked to Enlightenment, modernity, postmodernity or Ulrich Beck’s risk society.
+    <div class="chips" aria-label="Degree pathways">
+      <span class="chip">Curating Art</span><span class="chip">Museum Studies</span><span class="chip">International Law</span><span class="chip">Media</span><span class="chip">Education</span><span class="chip">Cross-Cultural Communication</span>
+    </div>
+  </section>
+
+  <nav class="tabs" aria-label="Simulator sections">
+    <button class="tab" data-tab="setup" aria-selected="true">1. Set up</button>
+    <button class="tab" data-tab="plan" aria-selected="false">2. Plan</button>
+    <button class="tab" data-tab="rehearse" aria-selected="false">3. Rehearse</button>
+    <button class="tab" data-tab="questions" aria-selected="false">4. Questions</button>
+    <button class="tab" data-tab="review" aria-selected="false">5. Review</button>
+  </nav>
+
+  <section id="setup" class="panel active">
+    <div class="grid">
+      <div class="card span-7">
+        <h2>Build an individual practice scenario</h2>
+        <div class="field">
+          <label for="primary">Primary degree pathway</label>
+          <select id="primary">
+            <option>Curating Art</option><option>Museum Studies</option><option>International Law</option><option>Media</option><option>Education</option><option>Cross-Cultural Communication</option>
+          </select>
+          <small>This is the main professional perspective through which you will judge the case.</small>
+        </div>
+        <div class="field">
+          <label for="secondary">Secondary interdisciplinary lens</label>
+          <select id="secondary">
+            <option>Museum Studies</option><option>International Law</option><option>Curating Art</option><option>Media</option><option>Education</option><option>Cross-Cultural Communication</option>
+          </select>
+          <small>The second lens must change, challenge or qualify the conclusion.</small>
+        </div>
+        <div class="field">
+          <label for="framework">Core theoretical framework</label>
+          <select id="framework">
+            <option value="all">Show all frameworks</option>
+            <option value="Enlightenment">Enlightenment</option>
+            <option value="Modernity">Modernity</option>
+            <option value="Postmodernity">Postmodernity</option>
+            <option value="Risk society">Ulrich Beck: risk society</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="topic">Exact evaluative question</label>
+          <select id="topic"></select>
+          <div id="selectedQuestion" class="question-box" aria-live="polite"></div>
+        </div>
+        <div class="field">
+          <label for="case">Case study</label>
+          <input id="case" type="text" placeholder="For example: the Benin Bronzes, a museum exhibition, an AI-generated news case, or a heritage treaty dispute">
+        </div>
+        <div class="field">
+          <label for="difficulty">Follow-up question difficulty</label>
+          <select id="difficulty"><option value="supportive">Supportive</option><option value="standard" selected>Standard</option><option value="challenging">Challenging</option></select>
+        </div>
+        <div class="actions"><button class="btn" id="build">Build my practice run</button><button class="btn ghost" id="sample">Insert a sample case</button></div>
+      </div>
+
+      <div class="card span-5">
+        <h2>How interdisciplinarity works</h2>
+        <div class="rule"><strong>One anchor + one meaningful connection.</strong><br>The presentation does not need equal coverage of two degrees. Use the primary pathway to lead the judgement and the secondary lens to expose a tension, responsibility or consequence.</div>
+        <h3 style="margin-top:18px">Framework reminders</h3>
+        <div class="framework-list">
+          <div class="framework-item"><strong>Enlightenment:</strong> reason, universal knowledge, classification, progress and public education.</div>
+          <div class="framework-item"><strong>Modernity:</strong> institutions, expertise, professionalisation, standardisation and administration.</div>
+          <div class="framework-item"><strong>Postmodernity:</strong> contested truth, plural narratives, representation, identity and institutional authority.</div>
+          <div class="framework-item"><strong>Risk society:</strong> manufactured risks, uncertainty, unequal exposure, global consequences and institutional responsibility.</div>
+        </div>
+      </div>
+
+      <div class="card span-12">
+        <h2>Your generated brief</h2>
+        <div id="generatedBrief" class="brief" aria-live="polite">Choose your settings and select <strong>Build my practice run</strong>.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="plan" class="panel">
+    <div class="grid">
+      <div class="card span-12">
+        <h2>The question you must answer by the end</h2>
+        <div id="planQuestion" class="question-box"></div>
+      </div>
+      <div class="card span-7">
+        <h2>Six-part argument planner</h2>
+        <div id="slides"></div>
+        <div class="actions"><button class="btn secondary" id="savePlan">Save notes in this browser</button><button class="btn ghost" id="clearPlan">Clear notes</button></div>
+      </div>
+      <div class="card span-5">
+        <h2>Argument stress test</h2>
+        <div class="field"><label for="thesis">Provisional answer</label><textarea id="thesis" placeholder="To a considerable / limited extent, because…"></textarea></div>
+        <div class="field"><label for="criterion">Your evaluative criterion</label><textarea id="criterion" placeholder="I will judge the issue according to legality, ethics, public value, access, authority, harm, inclusion or another explicit criterion."></textarea></div>
+        <div class="field"><label for="counter">Strongest counterargument or limitation</label><textarea id="counter" placeholder="A reasonable critic could argue…"></textarea></div>
+        <div class="field"><label for="synthesis">What does the secondary lens change?</label><textarea id="synthesis" placeholder="The secondary lens qualifies the conclusion because…"></textarea></div>
+        <div class="checks">
+          <h3>Answer-completeness check</h3>
+          <label><input type="checkbox" class="answerCheck"> I have used the exact wording of the question.</label>
+          <label><input type="checkbox" class="answerCheck"> I have defined what “extent” or my judgement means.</label>
+          <label><input type="checkbox" class="answerCheck"> I have considered a counterargument.</label>
+          <label><input type="checkbox" class="answerCheck"> My conclusion will give a direct, qualified answer.</label>
+        </div>
+        <div id="planStatus" class="status warn"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="rehearse" class="panel">
+    <div class="grid">
+      <div class="card span-7">
+        <h2>10-minute rehearsal timer</h2>
+        <div id="timer" class="timer">10:00</div>
+        <div id="timerSub" class="timer-note">Ready to begin.</div>
+        <div class="progress"><span id="progressBar"></span></div>
+        <div class="actions timer-controls"><button class="btn" id="startTimer">Start</button><button class="btn secondary" id="pauseTimer">Pause</button><button class="btn ghost" id="resetTimer">Reset</button></div>
+        <h3 style="margin-top:18px">Current speaking prompt</h3>
+        <div id="speakingPrompt" class="prompt"></div>
+      </div>
+      <div class="card span-5">
+        <h2>Suggested timing</h2>
+        <div id="stages"></div>
+      </div>
+      <div class="card span-12">
+        <h2>Rehearsal notes</h2>
+        <textarea id="rehearsalNotes" placeholder="Where did you rush? Which claim needed stronger evidence? Did you answer the exact question in the conclusion?"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section id="questions" class="panel">
+    <div class="grid">
+      <div class="card span-7">
+        <h2>Follow-up question simulator</h2>
+        <div id="questionContext" class="muted">Build a scenario first.</div>
+        <div id="questionText" class="follow-question">Select “New question” when you are ready.</div>
+        <div id="qTimer" class="timer-note"></div>
+        <div class="actions"><button class="btn" id="newQuestion">New question</button><button class="btn secondary" id="startQTimer">Start 90-second answer</button><button class="btn ghost" id="showHint">Show / hide answer strategy</button></div>
+        <div id="hint" class="hint"></div>
+        <div class="field" style="margin-top:15px"><label for="answerNotes">Notes on your answer</label><textarea id="answerNotes" placeholder="Answer in three moves: direct response, evidence, qualification."></textarea></div>
+      </div>
+      <div class="card span-5">
+        <h2>A strong answer uses PREP+</h2>
+        <ol>
+          <li><strong>Point:</strong> answer the question immediately.</li>
+          <li><strong>Reason:</strong> name the principle or criterion.</li>
+          <li><strong>Evidence:</strong> refer to the case or theory.</li>
+          <li><strong>Perspective:</strong> bring in the second discipline.</li>
+          <li><strong>Qualification:</strong> acknowledge limits without abandoning the judgement.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="review" class="panel">
+    <div class="grid">
+      <div class="card span-8">
+        <h2>Self-assessment</h2>
+        <p class="muted">Score each area from 0 to 5 after a complete rehearsal.</p>
+        <div id="rubric"></div>
+      </div>
+      <div class="card span-4">
+        <h2>Practice result</h2>
+        <div id="totalScore" class="timer" style="font-size:3.2rem">0/30</div>
+        <div id="feedback" class="feedback">Move the sliders to generate feedback.</div>
+        <div class="field" style="margin-top:15px"><label for="nextTarget">One target for the next rehearsal</label><textarea id="nextTarget" placeholder="For example: answer the exact question in the first and final minute."></textarea></div>
+        <div class="actions"><button class="btn secondary" id="downloadNotes">Download practice notes</button></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>INU3112/3512 · Individual presentation · 10 minutes plus follow-up questions</footer>
+</main>
+<script>
+const questions = [
+  {id:'E1',framework:'Enlightenment',title:'Universal knowledge and museums',question:'To what extent do contemporary museums still reproduce Enlightenment assumptions about universal knowledge and cultural authority?',theory:'reason, universal knowledge, classification, progress and the public value of knowledge',samples:['the British Museum as a universal museum','the Louvre and encyclopaedic display','a museum gallery organised as a universal history']},
+  {id:'E2',framework:'Enlightenment',title:'Universal access and contested objects',question:'How far can claims of universal public access justify the retention and display of contested cultural objects?',theory:'universalism, public knowledge, cultural authority and the relationship between ownership and access',samples:['the Parthenon sculptures','the Benin Bronzes','an Indigenous sacred object held by a national museum']},
+  {id:'E3',framework:'Enlightenment',title:'Education and universal curricula',question:'To what extent should educational institutions preserve universal curricula when knowledge and interpretation are culturally situated?',theory:'reason, common knowledge, public education, inclusion and the limits of universalism',samples:['a national history curriculum','a museum schools programme','a cross-cultural citizenship course']},
+  {id:'M1',framework:'Modernity',title:'Classification and professional power',question:'To what extent do classification systems in museums, media, education and law represent neutral expertise rather than cultural power?',theory:'order, expertise, administration, standardisation and institutional authority',samples:['a museum cataloguing system','a media content classification','a legal heritage designation or school assessment category']},
+  {id:'M2',framework:'Modernity',title:'Professionalisation and public trust',question:'How far has professionalisation increased public trust while narrowing whose knowledge counts as legitimate?',theory:'expertise, professions, bureaucracy, institutional trust and exclusion',samples:['curatorial authority in an exhibition','expert evidence in an international dispute','professional standards in journalism or teaching']},
+  {id:'M3',framework:'Modernity',title:'Standardisation and cultural difference',question:'To what extent should modern institutions prioritise standardisation over local and cultural difference?',theory:'administrative order, comparability, efficiency, universal rules and local knowledge',samples:['international museum standards','cross-border legal norms','national curricula or platform moderation rules']},
+  {id:'P1',framework:'Postmodernity',title:'Plural narratives and authority',question:'To what extent should museums, media and educational institutions replace authoritative narratives with multiple and contested perspectives?',theory:'grand narratives, unstable meaning, plural voices, representation and institutional authority',samples:['a contested history exhibition','reporting on a cross-cultural conflict','a curriculum dispute over national history']},
+  {id:'P2',framework:'Postmodernity',title:'Participation and power',question:'How far does audience or community participation democratise cultural interpretation rather than redistribute responsibility without power?',theory:'participation, authorship, voice, institutional power and the politics of representation',samples:['a co-curated exhibition','a community media project','participatory curriculum design']},
+  {id:'P3',framework:'Postmodernity',title:'Cross-cultural representation',question:'To what extent can cross-cultural communication avoid reinforcing stereotypes when meaning is shaped by context, identity and unequal power?',theory:'representation, discourse, identity, interpretation and unequal cultural authority',samples:['an international advertising campaign','news coverage of another culture','a museum exhibition produced for a global audience']},
+  {id:'R1',framework:'Risk society',title:'Climate risk and cultural heritage',question:'To what extent does Ulrich Beck’s risk-society theory explain institutional responses to climate threats facing museums and cultural heritage?',theory:'manufactured risk, uncertainty, global consequences, unequal exposure and reflexive modernisation',samples:['flood risk at a museum','wildfire risk to a heritage landscape','sea-level rise threatening a cultural site']},
+  {id:'R2',framework:'Risk society',title:'International law and uncertain harm',question:'How far should international law require preventive action when risks to cultural heritage are uncertain but potentially irreversible?',theory:'precaution, transboundary risk, uncertainty, state responsibility and enforcement',samples:['heritage protection during armed conflict','climate-related loss of cultural sites','illicit trafficking of cultural property']},
+  {id:'R3',framework:'Risk society',title:'AI, access and manufactured risk',question:'To what extent do digital platforms and artificial intelligence democratise cultural knowledge while creating new manufactured risks?',theory:'digital access, misinformation, authenticity, algorithmic power, uncertainty and institutional responsibility',samples:['AI-generated museum interpretation','a virtual exhibition','algorithmic news or education content about cultural history']}
+];
+const lensPrompts = {
+  'Curating Art':'selection, interpretation, display, aesthetics, ethics, artistic context and audience experience',
+  'Museum Studies':'collections, governance, participation, public value, institutional authority, access and trust',
+  'International Law':'ownership, jurisdiction, treaties, state obligations, human rights, enforcement and remedies',
+  'Media':'framing, representation, platforms, production, circulation, visibility and audience reception',
+  'Education':'pedagogy, curriculum, learning, inclusion, assessment and the authority of knowledge',
+  'Cross-Cultural Communication':'translation, cultural assumptions, identity, voice, power, misunderstanding and audience interpretation'
+};
+const stageData = [
+  {start:600,end:540,time:'0:00–1:00',name:'Frame the question',prompt:'State the exact evaluative question, identify the case and give your provisional answer.'},
+  {start:540,end:420,time:'1:00–3:00',name:'Explain the theory',prompt:'Define only the concepts needed for your argument. Make the connection to the case explicit.'},
+  {start:420,end:240,time:'3:00–6:00',name:'Analyse the case',prompt:'Use precise evidence. Explain how the evidence supports or challenges your theoretical claim.'},
+  {start:240,end:60,time:'6:00–9:00',name:'Evaluate interdisciplinarily',prompt:'Apply both degree lenses, compare their criteria and address the strongest counterargument.'},
+  {start:60,end:0,time:'9:00–10:00',name:'Answer and conclude',prompt:'Return to the exact wording and give a direct, qualified answer. State the professional significance.'}
+];
+const rubricData = [
+  ['Content','Accurate theory, relevant evidence, sustained analysis and evaluation.'],
+  ['Organisation and cohesion','Clear introduction, staging, signposting, conclusion and time management.'],
+  ['Delivery','Confident, intelligible, engaging and not dependent on a full script.'],
+  ['Language','Precise academic vocabulary, clear definitions and appropriate register.'],
+  ['Visual support','Relevant visuals integrated into the argument rather than used as decoration.'],
+  ['Handling questions','Direct, flexible and well-supported answers, including difficult questions.']
+];
+const generalFollowUps = {
+  supportive:[
+    'What is the most important theoretical concept in your presentation, and how does it help explain the case?',
+    'Why is your chosen case a suitable example for this question?',
+    'What is the clearest implication of your conclusion for a professional in your primary degree pathway?',
+    'Can you restate your answer to the evaluative question in one sentence?'
+  ],
+  standard:[
+    'Which piece of evidence carries the most weight in your argument, and why?',
+    'What would a reasonable critic say is missing from your analysis?',
+    'Where do your primary and secondary disciplinary lenses lead to different judgements?',
+    'What criterion are you using to decide the extent of your claim?',
+    'How far can your conclusion be generalised beyond this case?'
+  ],
+  challenging:[
+    'What evidence would make you change your conclusion?',
+    'Have you used the theory as an explanation, or only as a label for the case?',
+    'Could your proposed solution reproduce the same institutional power problem that you criticise?',
+    'What is the strongest alternative theoretical interpretation of this case?',
+    'If legality, ethics and public value point in different directions, which should prevail and why?'
+  ]
+};
+const frameworkFollowUps = {
+  'Enlightenment':['Who is included in the claim to universal knowledge, and who has historically defined it?','Can universal access be separated from the conditions in which the knowledge or collection was produced?'],
+  'Modernity':['Which apparently neutral professional practice in your case also exercises cultural power?','Does standardisation solve a problem, or merely make one form of knowledge dominant?'],
+  'Postmodernity':['Does including multiple perspectives risk treating all claims as equally well supported?','How can an institution retain public trust while admitting uncertainty and disagreement?'],
+  'Risk society':['Who produces the risk, who experiences it and who is expected to manage it?','What aspect of the case is not adequately explained by risk-society theory?']
+};
+const lensFollowUps = {
+  'Curating Art':'How would a different curatorial choice change the meaning or ethical impact of the case?',
+  'Museum Studies':'What institutional responsibility follows from your analysis, and how should public trust be protected?',
+  'International Law':'What legal rule, jurisdictional issue or enforcement problem most limits your preferred outcome?',
+  'Media':'How do framing, circulation and platform power affect what audiences understand about the case?',
+  'Education':'What should a learner understand or be able to question after engaging with this case?',
+  'Cross-Cultural Communication':'Whose assumptions, language or cultural position most shape the interpretation of the case?'
+};
+const answerHints = [
+  'Begin with a one-sentence answer, then justify it with one precise example and one qualification.',
+  'Name the criterion used for the judgement: legality, ethics, access, authority, harm, inclusion or professional responsibility.',
+  'Use the secondary discipline to complicate the answer, not merely to add another fact.',
+  'Acknowledge the limitation, then explain whether it weakens or only qualifies your conclusion.',
+  'Return to the theory and show what it explains that a descriptive account would miss.'
+];
+let state={primary:'Curating Art',secondary:'Museum Studies',question:questions[0],caseStudy:'',difficulty:'standard'};
+let remaining=600,timerId=null,running=false,qRemaining=90,qTimerId=null,currentQuestion='';
+const $=id=>document.getElementById(id);
+
+function init(){
+  populateQuestions();
+  syncSecondary();
+  renderSlides();
+  renderStages();
+  renderRubric();
+  updateSelectedQuestion();
+  updateTimer();
+  loadSaved();
+  document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>showTab(btn.dataset.tab)));
+  $('primary').addEventListener('change',syncSecondary);
+  $('framework').addEventListener('change',populateQuestions);
+  $('topic').addEventListener('change',updateSelectedQuestion);
+  $('build').addEventListener('click',buildScenario);
+  $('sample').addEventListener('click',insertSample);
+  $('savePlan').addEventListener('click',savePlan);
+  $('clearPlan').addEventListener('click',clearPlan);
+  ['thesis','criterion','counter','synthesis'].forEach(id=>$(id).addEventListener('input',updatePlanStatus));
+  document.querySelectorAll('.answerCheck').forEach(x=>x.addEventListener('change',updatePlanStatus));
+  $('startTimer').addEventListener('click',startTimer);
+  $('pauseTimer').addEventListener('click',pauseTimer);
+  $('resetTimer').addEventListener('click',resetTimer);
+  $('newQuestion').addEventListener('click',newFollowUp);
+  $('startQTimer').addEventListener('click',startQuestionTimer);
+  $('showHint').addEventListener('click',()=>$('hint').classList.toggle('show'));
+  $('downloadNotes').addEventListener('click',downloadNotes);
+}
+function showTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===id)));
+  window.scrollTo({top:document.querySelector('.tabs').offsetTop-12,behavior:'smooth'});
+}
+function syncSecondary(){
+  const primary=$('primary').value;
+  [...$('secondary').options].forEach(o=>o.disabled=o.value===primary);
+  if($('secondary').value===primary){$('secondary').value=[...$('secondary').options].find(o=>o.value!==primary).value;}
+}
+function populateQuestions(){
+  const f=$('framework').value;
+  const old=$('topic').value;
+  const list=f==='all'?questions:questions.filter(q=>q.framework===f);
+  $('topic').innerHTML='';
+  list.forEach(q=>{const o=document.createElement('option');o.value=q.id;o.textContent=`${q.id} · ${q.question}`;$('topic').appendChild(o);});
+  if(list.some(q=>q.id===old))$('topic').value=old;
+  updateSelectedQuestion();
+}
+function selectedQuestion(){return questions.find(q=>q.id===$('topic').value)||questions[0];}
+function updateSelectedQuestion(){
+  const q=selectedQuestion();
+  $('selectedQuestion').innerHTML=`<span class="label">Student must answer this exact question</span><div class="question">${q.question}</div><div class="muted" style="margin-top:7px"><strong>Framework:</strong> ${q.framework} · <strong>Focus:</strong> ${q.title}</div>`;
+  $('planQuestion').innerHTML=`<span class="label">Required evaluative question</span><div class="question">${q.question}</div>`;
+}
+function getState(){
+  state.primary=$('primary').value;
+  state.secondary=$('secondary').value;
+  state.question=selectedQuestion();
+  state.caseStudy=$('case').value.trim();
+  state.difficulty=$('difficulty').value;
+  return state;
+}
+function buildScenario(){
+  getState();
+  const c=state.caseStudy||'a focused case study selected by the student';
+  $('generatedBrief').innerHTML=`
+    <div class="meta"><span class="pill">${state.question.framework}</span><span class="pill">${state.primary}</span><span class="pill accent">${state.secondary}</span></div>
+    <h3>${state.question.question}</h3>
+    <p><strong>Theoretical anchor:</strong> ${state.question.theory}.</p>
+    <p><strong>Case study:</strong> ${escapeHtml(c)}.</p>
+    <p><strong>Primary lens — ${state.primary}:</strong> evaluate the issue through ${lensPrompts[state.primary]}.</p>
+    <p><strong>Secondary lens — ${state.secondary}:</strong> use ${lensPrompts[state.secondary]} to introduce a genuine tension, responsibility or consequence that changes the judgement.</p>
+    <p><strong>Required final outcome:</strong> end with a direct and qualified answer using language such as “to a considerable extent”, “only to a limited extent”, “primarily where…” or “under the following conditions…”.</p>`;
+  $('planQuestion').innerHTML=`<span class="label">Required evaluative question</span><div class="question">${state.question.question}</div><div class="muted" style="margin-top:7px">Your conclusion must use this wording and state the extent of your judgement.</div>`;
+  $('questionContext').textContent=`${state.question.framework} · ${state.primary} + ${state.secondary}${state.caseStudy?' · '+state.caseStudy:''}`;
+  renderSlides();
+  showTab('plan');
+}
+function insertSample(){
+  const q=selectedQuestion();
+  $('case').value=q.samples[Math.floor(Math.random()*q.samples.length)];
+}
+function renderSlides(){
+  const specs=[
+    ['Question, case and provisional answer','Use the exact question. State the case, your initial judgement and why the issue matters.'],
+    ['Theoretical framework','Define the relevant concepts accurately. Avoid explaining more theory than the argument needs.'],
+    ['Case evidence','Present only the context and evidence needed to test the claim.'],
+    ['Primary disciplinary analysis','Apply the primary degree pathway and make the evaluative criterion explicit.'],
+    ['Interdisciplinary challenge','Use the secondary lens to test, challenge or qualify the conclusion; address a counterargument.'],
+    ['Direct conclusion','Return to the exact question and state a qualified answer, professional consequence and remaining limitation.']
+  ];
+  const saved=readSaved();
+  $('slides').innerHTML=specs.map((s,i)=>`<div class="slide"><div class="slide-head"><span class="num">${i+1}</span>${s[0]}</div><p>${s[1]}</p><textarea data-slide="${i}" aria-label="Notes for section ${i+1}" placeholder="Your notes…"></textarea></div>`).join('');
+  document.querySelectorAll('[data-slide]').forEach(el=>el.value=(saved.slides||[])[+el.dataset.slide]||'');
+}
+function readSaved(){try{return JSON.parse(localStorage.getItem('inuPresentationSimulator')||'{}')}catch(e){return {}}}
+function saveData(data){try{localStorage.setItem('inuPresentationSimulator',JSON.stringify(data));return true}catch(e){return false}}
+function savePlan(){
+  const data={slides:[...document.querySelectorAll('[data-slide]')].map(x=>x.value),thesis:$('thesis').value,criterion:$('criterion').value,counter:$('counter').value,synthesis:$('synthesis').value,rehearsal:$('rehearsalNotes').value,target:$('nextTarget').value};
+  const ok=saveData(data);
+  $('planStatus').textContent=ok?'Plan saved in this browser.':'Plan remains visible for this session, but browser storage is unavailable.';
+  $('planStatus').className='status good';
+}
+function loadSaved(){
+  const d=readSaved();
+  $('thesis').value=d.thesis||'';$('criterion').value=d.criterion||'';$('counter').value=d.counter||'';$('synthesis').value=d.synthesis||'';$('rehearsalNotes').value=d.rehearsal||'';$('nextTarget').value=d.target||'';
+  updatePlanStatus();
+}
+function clearPlan(){
+  try{localStorage.removeItem('inuPresentationSimulator')}catch(e){}
+  document.querySelectorAll('textarea').forEach(x=>x.value='');
+  document.querySelectorAll('.answerCheck').forEach(x=>x.checked=false);
+  renderSlides();updatePlanStatus();
+}
+function updatePlanStatus(){
+  const textCount=[$('thesis'),$('criterion'),$('counter'),$('synthesis')].filter(x=>x.value.trim().length>=25).length;
+  const checkCount=[...document.querySelectorAll('.answerCheck')].filter(x=>x.checked).length;
+  const total=textCount+checkCount;
+  $('planStatus').textContent=total===8?'Your plan contains a judgement, criterion, challenge, interdisciplinary synthesis and a complete answer strategy.':`${total}/8 planning checks are complete.`;
+  $('planStatus').className=total>=7?'status good':'status warn';
+}
+function renderStages(){
+  $('stages').innerHTML=stageData.map((s,i)=>`<div class="stage" data-stage="${i}"><strong>${s.time}</strong><div><strong>${s.name}</strong><div class="muted">${s.prompt}</div></div></div>`).join('');
+}
+function formatTime(sec){sec=Math.max(0,sec);return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;}
+function updateTimer(){
+  $('timer').textContent=formatTime(remaining);$('timer').classList.toggle('over',remaining<=0);$('progressBar').style.width=`${Math.min(100,(600-remaining)/6)}%`;
+  let idx=stageData.findIndex(s=>remaining<=s.start&&remaining>s.end);if(remaining<=0)idx=4;
+  document.querySelectorAll('[data-stage]').forEach((x,i)=>{x.classList.toggle('current',i===idx);x.classList.toggle('done',i<idx)});
+  const st=stageData[idx]||stageData[4];
+  $('speakingPrompt').textContent=remaining<=0?'Stop. Finish the sentence, note where you reached and move to follow-up questions.':st.prompt;
+  $('timerSub').textContent=remaining<=0?'Ten minutes reached.':'Current stage: '+st.name;
+}
+function startTimer(){if(running)return;running=true;timerId=setInterval(()=>{remaining--;updateTimer();if(remaining<=0){pauseTimer();beep()}},1000)}
+function pauseTimer(){running=false;if(timerId)clearInterval(timerId);timerId=null}
+function resetTimer(){pauseTimer();remaining=600;updateTimer()}
+function beep(){try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=660;g.gain.setValueAtTime(.07,a.currentTime);o.start();o.stop(a.currentTime+.22)}catch(e){}}
+function newFollowUp(){
+  getState();
+  const pool=[...generalFollowUps[state.difficulty],...(frameworkFollowUps[state.question.framework]||[]),lensFollowUps[state.primary],lensFollowUps[state.secondary]];
+  currentQuestion=pool[Math.floor(Math.random()*pool.length)];
+  $('questionText').textContent=currentQuestion;
+  $('hint').textContent=answerHints[Math.floor(Math.random()*answerHints.length)];$('hint').classList.remove('show');$('answerNotes').value='';
+  qRemaining=90;updateQuestionTimer();
+}
+function updateQuestionTimer(){$('qTimer').textContent=qRemaining===90?'':`Answer time: ${formatTime(qRemaining)}`;$('qTimer').className=qRemaining<=15?'timer-note warn':'timer-note'}
+function startQuestionTimer(){if(qTimerId)clearInterval(qTimerId);qRemaining=90;updateQuestionTimer();qTimerId=setInterval(()=>{qRemaining--;updateQuestionTimer();if(qRemaining<=0){clearInterval(qTimerId);qTimerId=null;beep()}},1000)}
+function renderRubric(){
+  $('rubric').innerHTML=rubricData.map((r,i)=>`<div class="rubric-row"><div><strong>${r[0]}</strong><div class="muted">${r[1]}</div></div><input type="range" min="0" max="5" value="0" step="1" data-score="${i}" aria-label="${r[0]} score"><div class="score" id="score${i}">0</div></div>`).join('');
+  document.querySelectorAll('[data-score]').forEach(x=>x.addEventListener('input',calculateScore));
+}
+function calculateScore(){
+  const vals=[...document.querySelectorAll('[data-score]')].map(x=>+x.value);vals.forEach((v,i)=>$('score'+i).textContent=v);
+  const total=vals.reduce((a,b)=>a+b,0);$('totalScore').textContent=`${total}/30`;
+  const weak=vals.indexOf(Math.min(...vals));
+  let msg=total<12?'Build the foundations: simplify the argument, clarify the theory and rehearse a complete timed structure.':total<21?'The presentation is taking shape. Replace description with analysis and strengthen the weakest criterion.':total<27?'A strong practice run. Improve precision, counterargument and the integration of the secondary degree lens.':'A very strong practice run. Test the argument under pressure with challenging questions and verify every major claim.';
+  $('feedback').innerHTML=`${msg}<br><br><strong>Priority:</strong> ${rubricData[weak][0]}.`;
+}
+function downloadNotes(){
+  getState();
+  const scores=[...document.querySelectorAll('[data-score]')].map((x,i)=>`${rubricData[i][0]}: ${x.value}/5`).join('\n');
+  const slides=[...document.querySelectorAll('[data-slide]')].map((x,i)=>`Section ${i+1}: ${x.value}`).join('\n');
+  const text=`INU3112/3512 Individual Presentation Practice Notes\n\nFramework: ${state.question.framework}\nQuestion: ${state.question.question}\nPrimary degree pathway: ${state.primary}\nSecondary interdisciplinary lens: ${state.secondary}\nCase study: ${state.caseStudy||'(not entered)'}\n\nPROVISIONAL ANSWER\n${$('thesis').value}\n\nEVALUATIVE CRITERION\n${$('criterion').value}\n\nCOUNTERARGUMENT / LIMITATION\n${$('counter').value}\n\nINTERDISCIPLINARY SYNTHESIS\n${$('synthesis').value}\n\nPLAN\n${slides}\n\nREHEARSAL NOTES\n${$('rehearsalNotes').value}\n\nLAST FOLLOW-UP QUESTION\n${currentQuestion}\n${$('answerNotes').value}\n\nSELF-ASSESSMENT\n${scores}\n\nNEXT TARGET\n${$('nextTarget').value}\n`;
+  const blob=new Blob([text],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='individual-presentation-practice-notes.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function escapeHtml(s){return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));}
+init();
+</script>
+</body>
+</html>
